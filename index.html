@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<title>Crate</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon.png">
+<style>
+html, body { margin: 0; height: 100%; background: #000; color: #ccc; font: 16px -apple-system, system-ui, sans-serif; }
+#ui { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
+form { display: none; gap: 8px; }
+input { font: inherit; padding: 8px 10px; border-radius: 6px; border: 1px solid #444; background: #111; color: #eee; width: 15em; }
+button { font: inherit; padding: 8px 14px; border-radius: 6px; border: 0; background: #ddd; color: #000; }
+#s { min-height: 1.4em; opacity: 0.8; }
+</style>
+</head>
+<body>
+<div id="ui">
+<form id="f"><input id="p" type="password" autocomplete="current-password" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="passphrase"><button>Open</button></form>
+<div id="s"></div>
+</div>
+<script src="loader.js"></script>
+</body>
+</html>
