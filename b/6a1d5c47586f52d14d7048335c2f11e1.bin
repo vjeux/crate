@@ -249,16 +249,16 @@ export function start() {
     wasm.start();
 }
 
+function wasm_bindgen_3603b06be3404e26___convert__closures_____invoke___f64_____(arg0, arg1, arg2) {
+    wasm.wasm_bindgen_3603b06be3404e26___convert__closures_____invoke___f64_____(arg0, arg1, arg2);
+}
+
 function wasm_bindgen_3603b06be3404e26___convert__closures_____invoke___web_sys_8c6202f59ecdf96___features__gen_MessageEvent__MessageEvent_____(arg0, arg1, arg2) {
     wasm.wasm_bindgen_3603b06be3404e26___convert__closures_____invoke___web_sys_8c6202f59ecdf96___features__gen_MessageEvent__MessageEvent_____(arg0, arg1, arg2);
 }
 
 function wasm_bindgen_3603b06be3404e26___convert__closures_____invoke______(arg0, arg1) {
     wasm.wasm_bindgen_3603b06be3404e26___convert__closures_____invoke______(arg0, arg1);
-}
-
-function wasm_bindgen_3603b06be3404e26___convert__closures_____invoke___f64_____(arg0, arg1, arg2) {
-    wasm.wasm_bindgen_3603b06be3404e26___convert__closures_____invoke___f64_____(arg0, arg1, arg2);
 }
 
 function wasm_bindgen_3603b06be3404e26___convert__closures_____invoke___wasm_bindgen_3603b06be3404e26___JsValue_____(arg0, arg1, arg2) {
