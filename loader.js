@@ -33,8 +33,10 @@ async function open(key, blob) {
   return new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: blob.subarray(0, 12) }, key, blob.subarray(12)));
 }
 // null: wrong key. Throws when the index cannot be fetched (network, server mid-publish).
+// An open site (meta.o) has no key: its blobs are the plain files.
 async function readIndex(key, meta) {
   const blob = await fetchBlob(meta.i);
+  if (meta.o) return JSON.parse(new TextDecoder().decode(blob));
   try { return JSON.parse(new TextDecoder().decode(await open(key, blob))); } catch (e) { return null; }
 }
 function retryLater(msg) {
@@ -66,7 +68,8 @@ async function install(key, meta, index) {
         const r = await old.match(req);
         if (r) { await cache.put(req, r); continue; }
       }
-      const plain = await open(key, await fetchBlob(f.b));
+      const blob = await fetchBlob(f.b);
+      const plain = meta.o ? blob : await open(key, blob);
       await cache.put(req, new Response(plain, { headers: { 'Content-Type': f.t } }));
       bytes += f.n;
       say(verb + Math.floor(100 * bytes / Math.max(1, fetchTotal)) + '%');
@@ -95,9 +98,9 @@ async function main() {
   if (haveCache && (!meta || meta.v === have)) { location.replace('app/index.html'); return; }
   if (!meta) { say(haveCache ? '' : 'Offline. Open once while online to install.'); return; }
   console.log('crate: have ' + have + ' ' + haveCache);
-  let key = await kget();
+  let key = meta.o ? null : await kget();
   console.log('crate: key ' + !!key);
-  let index = key ? await readIndex(key, meta) : null;
+  let index = (key || meta.o) ? await readIndex(key, meta) : null;
   if (!index && window.__boxTestPass) {
     key = await derive(window.__boxTestPass, meta);
     index = await readIndex(key, meta);
