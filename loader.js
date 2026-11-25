@@ -56,10 +56,15 @@ async function install(key, meta, index) {
   let prev = {};
   try { prev = JSON.parse(localStorage.getItem('crate:index') || '{}'); } catch (e) {}
   const old = haveV && haveV !== meta.v && await caches.has('crate-app-' + haveV) ? await caches.open('crate-app-' + haveV) : null;
-  const fetchTotal = index.reduce((a, f) => a + (old && prev[f.p] === f.b ? 0 : f.n), 0);
+  // A gzip twin (f.z) downloads instead of the file where the browser can inflate it.
+  const gz = typeof DecompressionStream === 'function';
+  const fetchTotal = index.reduce((a, f) => a + (old && prev[f.p] === f.b ? 0 : (gz && f.z ? f.zn : f.n)), 0);
   const verb = old ? 'Updating ' : 'Installing ';
   let bytes = 0;
   let next = 0;
+  async function inflate(z) {
+    return new Uint8Array(await new Response(new Blob([z]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer());
+  }
   async function worker() {
     while (next < index.length) {
       const f = index[next++];
@@ -68,11 +73,22 @@ async function install(key, meta, index) {
         const r = await old.match(req);
         if (r) { await cache.put(req, r); continue; }
       }
-      const blob = await fetchBlob(f.b);
-      const plain = meta.o ? blob : await open(key, blob);
+      let plain = null;
+      if (gz && f.z) {
+        try {
+          const zb = await fetchBlob(f.z);
+          plain = await inflate(meta.o ? zb : await open(key, zb));
+          if (plain.length !== f.n) plain = null;
+          else bytes += f.zn;
+        } catch (e) { plain = null; }
+      }
+      if (!plain) {
+        const blob = await fetchBlob(f.b);
+        plain = meta.o ? blob : await open(key, blob);
+        bytes += f.n;
+      }
       await cache.put(req, new Response(plain, { headers: { 'Content-Type': f.t } }));
-      bytes += f.n;
-      say(verb + Math.floor(100 * bytes / Math.max(1, fetchTotal)) + '%');
+      say(verb + Math.min(100, Math.floor(100 * bytes / Math.max(1, fetchTotal))) + '%');
     }
   }
   await Promise.all([worker(), worker(), worker(), worker()]);
