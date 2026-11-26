@@ -111,7 +111,7 @@ async function main() {
   console.log('crate: meta ' + (meta ? meta.v : 'none'));
   const have = localStorage.getItem('crate:v');
   const haveCache = have ? await caches.has('crate-app-' + have) : false;
-  if (haveCache && (!meta || meta.v === have)) { location.replace('app/index.html'); return; }
+  if (haveCache && (!meta || meta.v === have)) { location.replace('app/index.html' + location.search); return; }
   if (!meta) { say(haveCache ? '' : 'Offline. Open once while online to install.'); return; }
   console.log('crate: have ' + have + ' ' + haveCache);
   let key = meta.o ? null : await kget();
@@ -141,16 +141,16 @@ async function main() {
   }
   say('Installing...');
   try { await install(key, meta, index); } catch (e) {
-    if (haveCache) { location.replace('app/index.html'); return; }
+    if (haveCache) { location.replace('app/index.html' + location.search); return; }
     retryLater('Install failed (' + e.message + ').');
     return;
   }
-  location.replace('app/index.html');
+  location.replace('app/index.html' + location.search);
 }
 main().catch(e => {
   const have = localStorage.getItem('crate:v');
   (have ? caches.has('crate-app-' + have) : Promise.resolve(false)).then(ok => {
-    if (ok) location.replace('app/index.html');
+    if (ok) location.replace('app/index.html' + location.search);
     else retryLater('Could not download (' + e.message + ').');
   });
 });

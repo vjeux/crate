@@ -10,6 +10,22 @@ self.addEventListener('fetch', e => {
   if (url.origin !== location.origin || e.request.method !== 'GET') return;
   const scope = new URL(self.registration.scope);
   const rel = url.pathname.slice(scope.pathname.length);
+  if (rel === 'app/board.json') {
+    // The leaderboard's address: the site's own board.json, never cached (a tunnel's URL changes
+    // when it restarts and only board.json is republished); offline, the app's copy.
+    e.respondWith((async () => {
+      try {
+        const r = await fetch(scope.pathname + 'board.json', { cache: 'no-store' });
+        if (r.ok) return r;
+      } catch (err) {}
+      for (const k of (await caches.keys()).filter(k => k.startsWith('crate-app-'))) {
+        const r = await (await caches.open(k)).match(scope.pathname + rel);
+        if (r) return r;
+      }
+      return new Response('{}', { status: 404 });
+    })());
+    return;
+  }
   if (rel.startsWith('app/')) {
     e.respondWith((async () => {
       const keys = (await caches.keys()).filter(k => k.startsWith('crate-app-'));
@@ -28,7 +44,7 @@ self.addEventListener('fetch', e => {
     })());
     return;
   }
-  if (rel === 'v.json' || rel.startsWith('b/')) return;
+  if (rel === 'v.json' || rel === 'board.json' || rel.startsWith('b/')) return;
   e.respondWith((async () => {
     const c = await caches.open(SHELL);
     const hit = await c.match(e.request, { ignoreSearch: true });
